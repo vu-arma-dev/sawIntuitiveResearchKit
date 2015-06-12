@@ -122,6 +122,30 @@ if (cisst_FOUND_AS_REQUIRED)
       # link against cisst libraries (and dependencies)
       cisst_target_link_libraries (sawIntuitiveResearchKitQtHaptics ${REQUIRED_CISST_LIBRARIES})
 
+      # example with OpenIGTLink
+      cisst_find_saw_component (sawOpenIGTLink)
+      if (sawOpenIGTLink_FOUND)
+        # saw components configuration
+        include_directories (${sawOpenIGTLink_INCLUDE_DIR})
+        link_directories (${sawOpenIGTLink_LIBRARY_DIR})
+
+        # main program used to test a single arm
+        add_executable (sawIntuitiveResearchKitQtArmIGT mainQtArmIGT.cpp)
+        set_property (TARGET sawIntuitiveResearchKitQtArmIGT PROPERTY FOLDER "sawIntuitiveResearchKit")
+        # link against non cisst libraries and cisst components
+        target_link_libraries (sawIntuitiveResearchKitQtArmIGT
+                               ${sawRobotIO1394_LIBRARIES}
+                               ${sawIntuitiveResearchKit_LIBRARIES}
+                               ${sawControllers_LIBRARIES}
+                               ${sawTextToSpeech_LIBRARIES}
+                               ${sawOpenIGTLink_LIBRARIES})
+        # link against cisst libraries (and dependencies)
+        cisst_target_link_libraries (sawIntuitiveResearchKitQtArmIGT ${REQUIRED_CISST_LIBRARIES})
+
+      else (sawOpenIGTLink_FOUND)
+        message ("sawOpenIGTLink not found, example will not be compiled")
+      endif (sawOpenIGTLink_FOUND)
+
       # example using JSON
       if (CISST_HAS_JSON)
 
