@@ -1189,6 +1189,19 @@ void mtsIntuitiveResearchKitArm::ControlEffortCartesian(void)
     // update torques based on wrench
     vctDoubleVec force(6);
 
+    // WARNING: BEGIN UNTESTED CODE
+
+    double desired_j6_torque = -2 * JointsKinematics.Position()[5];
+    if (desired_j6_torque < -1) desired_j6_torque = -1;
+    if (desired_j6_torque > 1) desired_j6_torque = 1;
+    vctDoubleVec enforced_torque(NumberOfJoints(), 0.0);
+    enforced_torque[5] = desired_j6_torque;
+    vctDoubleVec enforced_torque_wrench(6);
+    enforced_torque_wrench.ProductOf(mJacobianPInverseData.PInverse(), enforced_torque);
+
+
+    // END UNTESTED CODE
+
     // body wrench
     if (mWrenchType == WRENCH_BODY) {
         // either using wrench provided by user or cartesian impedance
@@ -1215,12 +1228,14 @@ void mtsIntuitiveResearchKitArm::ControlEffortCartesian(void)
                 force.Assign(mWrenchSet.Force());
             }
         }
-        JointExternalEffort.ProductOf(mJacobianBody.Transpose(), force);
+        JointExternalEffort.ProductOf(mJacobianBody.Transpose(), force - enforced_torque_wrench);
+        JointExternalEffort = JointExternalEffort + enforced_torque;
     }
     // spatial wrench
     else if (mWrenchType == WRENCH_SPATIAL) {
         force.Assign(mWrenchSet.Force());
-        JointExternalEffort.ProductOf(mJacobianSpatial.Transpose(), force);
+        JointExternalEffort.ProductOf(mJacobianBody.Transpose(), force - enforced_torque_wrench);
+        JointExternalEffort = JointExternalEffort + enforced_torque;
     }
 
     // add gravity compensation if needed
