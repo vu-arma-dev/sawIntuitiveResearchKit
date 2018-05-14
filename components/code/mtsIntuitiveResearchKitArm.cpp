@@ -956,9 +956,9 @@ void mtsIntuitiveResearchKitArm::ControlPositionJoint(void)
 void mtsIntuitiveResearchKitArm::ControlPositionRelativeJoint(void)
 {
     if (mHasNewPIDGoal) {
-
-        std::cerr << CMN_LOG_DETAILS << " --------- tbd" << std::endl;
-
+        // added relative position to current desired position
+        JointSet.Add(mJointRelative);
+        SetPositionJointLocal(JointSet);
         // reset flag
         mJointRelative.Zeros();
         mHasNewPIDGoal = false;
@@ -1107,6 +1107,7 @@ void mtsIntuitiveResearchKitArm::SetControlSpaceAndMode(const mtsIntuitiveResear
             PID.EnableTorqueMode(vctBoolVec(NumberOfJoints(), false));
             mHasNewPIDGoal = false;
             mCartesianRelative = vctFrm3::Identity();
+            JointSet.Assign(JointsDesiredPID.Position(), NumberOfJoints());
             mJointRelative.Zeros();
             mEffortOrientationLocked = false;
             break;
@@ -1348,7 +1349,7 @@ void mtsIntuitiveResearchKitArm::SetPositionRelativeJoint(const prmPositionJoint
     SetControlSpaceAndMode(mtsIntuitiveResearchKitArmTypes::JOINT_SPACE,
                            mtsIntuitiveResearchKitArmTypes::POSITION_INCREMENT_MODE);
     // set goal
-    mJointRelative.Add(difference.Goal());
+    mJointRelative.Ref(NumberOfJointsKinematics()).Add(difference.Goal());
     mHasNewPIDGoal = true;
 }
 

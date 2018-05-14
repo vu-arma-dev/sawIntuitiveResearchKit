@@ -169,6 +169,7 @@ void mtsIntuitiveResearchKitPSM::Init(void)
     RobotInterface->AddCommandReadState(this->StateTable, JawDesired, "GetStateJawDesired");
     RobotInterface->AddEventWrite(ClutchEvents.ManipClutch, "ManipClutch", prmEventButton());
     RobotInterface->AddCommandWrite(&mtsIntuitiveResearchKitPSM::SetPositionJaw, this, "SetPositionJaw");
+    RobotInterface->AddCommandWrite(&mtsIntuitiveResearchKitPSM::SetPositionRelativeJaw, this, "SetPositionRelativeJaw");
     RobotInterface->AddCommandWrite(&mtsIntuitiveResearchKitPSM::SetPositionGoalJaw, this, "SetPositionGoalJaw");
     RobotInterface->AddCommandWrite(&mtsIntuitiveResearchKitPSM::SetEffortJaw, this, "SetEffortJaw");
     RobotInterface->AddCommandWrite(&mtsIntuitiveResearchKitPSM::SetAdapterPresent, this, "SetAdapterPresent");
@@ -967,6 +968,48 @@ void mtsIntuitiveResearchKitPSM::SetPositionJaw(const prmPositionJointSet & jawP
 
     // save goal
     JawGoal = jawPosition.Goal().at(0);
+    mHasNewPIDGoal = true;
+}
+
+void mtsIntuitiveResearchKitPSM::SetPositionRelativeJaw(const prmPositionJointSet & jawPosition)
+{
+    // we need to need to at least ready to control in joint space
+    if (!ArmIsReady("SetPositionJaw", mtsIntuitiveResearchKitArmTypes::JOINT_SPACE)) {
+        return;
+    }
+
+    // keep cartesian space is already there, otherwise use joint_space
+    switch (mControlSpace) {
+    case mtsIntuitiveResearchKitArmTypes::CARTESIAN_SPACE:
+        if (! ((mControlMode == mtsIntuitiveResearchKitArmTypes::POSITION_MODE)
+               || (mControlMode != mtsIntuitiveResearchKitArmTypes::POSITION_INCREMENT_MODE))) {
+            SetControlSpaceAndMode(mtsIntuitiveResearchKitArmTypes::CARTESIAN_SPACE,
+                                   mtsIntuitiveResearchKitArmTypes::POSITION_MODE);
+            // make sure all other joints have a reasonable cartesian
+            // goal for all other joints
+            CartesianSetParam.Goal().Assign(CartesianGetDesiredParam.Position());
+            break;
+        }
+    case mtsIntuitiveResearchKitArmTypes::JOINT_SPACE:
+        if (mControlMode != mtsIntuitiveResearchKitArmTypes::POSITION_MODE) {
+            // we are initiating the control mode switch so we need to
+            // set a reasonable JointSet
+            SetControlSpaceAndMode(mtsIntuitiveResearchKitArmTypes::JOINT_SPACE,
+                                   mtsIntuitiveResearchKitArmTypes::POSITION_MODE);
+            // make sure all other joints have a reasonable goal
+            JointSet.Assign(JointsDesiredPID.Position(), NumberOfJoints());
+        }
+        break;
+    default:
+        // we are initiating the control mode switch
+        SetControlSpaceAndMode(mtsIntuitiveResearchKitArmTypes::JOINT_SPACE,
+                               mtsIntuitiveResearchKitArmTypes::POSITION_MODE);
+        // make sure all other joints have a reasonable goal
+        JointSet.Assign(JointsDesiredPID.Position(), NumberOfJoints());
+    }
+
+    // save goal
+    JawGoal += jawPosition.Goal().at(0);
     mHasNewPIDGoal = true;
 }
 

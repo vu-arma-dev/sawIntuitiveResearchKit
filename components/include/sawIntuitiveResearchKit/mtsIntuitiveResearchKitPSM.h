@@ -116,6 +116,7 @@ protected:
     void EventHandlerManipClutch(const prmEventButton & button);
 
     void SetPositionJaw(const prmPositionJointSet & jawPosition);
+    void SetPositionRelativeJaw(const prmPositionJointSet & jawPosition);
     void SetPositionGoalJaw(const prmPositionJointSet & jawPosition);
     void SetEffortJaw(const prmForceTorqueJointSet & effort);
 
