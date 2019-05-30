@@ -47,6 +47,19 @@ class {
             description Used to set trajectory joint goal (Current/Desired);
         }
     }
+    enum {
+        name SpecialCommand;
+        enum-value {
+            name HFC_OFF;
+            value 0;
+            description Turn off hybrid force controller;
+        }
+        enum-value {
+            name HFC_ON;
+            value 1;
+            description Turn on hybrid force controller;
+        }
+    }
 }
 
 // Header for socket state and command message
@@ -58,7 +71,7 @@ class {
         name Version;
         type int;
         visibility public;
-    default 10000;
+    default 10100;
     description Version number. 10000 stands for 1.00.00;
     }
 
@@ -130,10 +143,25 @@ class {
     }
 
     member {
+        name CurrentForce;
+        type vct3;
+        visibility public;
+        description Current force on the arm;
+    }
+
+    member {
         name CurrentJaw;
         type double;
         visibility public;
         description Current jaw position of the arm;
+    }
+
+    member {
+        name CurrentSpecial;
+        type socketMessages::SpecialCommand;
+        visibility public;
+        default socketMessages::HFC_OFF;
+        description Special Command for other data;
     }
 }
 
@@ -165,9 +193,24 @@ class {
     }
 
     member {
+        name GoalForce;
+        type vct3;
+        visibility public;
+        description Desired force control on the arm;
+    }   
+
+    member {
         name GoalJaw;
         type double;
         visibility public;
         description Desired jaw position of the arm;
+    }
+
+    member {
+        name GoalSpecial;
+        type socketMessages::SpecialCommand;
+        visibility public;
+        default socketMessages::HFC_OFF;
+        description Special Command for other data;
     }
 }

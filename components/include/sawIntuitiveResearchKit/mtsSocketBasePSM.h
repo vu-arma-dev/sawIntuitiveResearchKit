@@ -68,6 +68,7 @@ protected:
     bool mIsServer;
     const osaTimeServer & mTimeServer;
     socketMessages::StateType CurrentState, DesiredState;
+    socketMessages::SpecialCommand CurrentSpecial,DesiredSpecial;
 
 private:
     unsigned int mPacketsLost;

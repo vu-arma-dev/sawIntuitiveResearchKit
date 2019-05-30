@@ -19,6 +19,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <sawIntuitiveResearchKit/mtsSocketClientPSM.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
 
+
 CMN_IMPLEMENT_SERVICES_DERIVED(mtsSocketClientPSM, mtsTaskPeriodic);
 
 mtsSocketClientPSM::mtsSocketClientPSM(const std::string & componentName, const double periodInSeconds,
@@ -28,12 +29,14 @@ mtsSocketClientPSM::mtsSocketClientPSM(const std::string & componentName, const 
     this->StateTable.AddData(PositionCartesianCurrent, "PositionCartesianCurrent");
     StateJaw.Position().resize(1);
     this->StateTable.AddData(StateJaw, "StateJaw");
+    this->StateTable.AddData(ForceCartesianCurrent, "ForceCartesianCurrent");
 
     mtsInterfaceProvided * interfaceProvided = AddInterfaceProvided("Robot");
     if (interfaceProvided) {
         interfaceProvided->AddMessageEvents();
         interfaceProvided->AddCommandReadState(this->StateTable, PositionCartesianCurrent, "GetPositionCartesian");
         interfaceProvided->AddCommandReadState(this->StateTable, StateJaw, "GetStateJaw");
+        interfaceProvided->AddCommandReadState(this->StateTable, ForceCartesianCurrent, "GetForceCartesian");
 
         interfaceProvided->AddCommandVoid(&mtsSocketClientPSM::Freeze,
                                           this, "Freeze");
@@ -47,6 +50,14 @@ mtsSocketClientPSM::mtsSocketClientPSM(const std::string & componentName, const 
                                            this , "GetDesiredState");
         interfaceProvided->AddCommandRead(&mtsSocketClientPSM::GetCurrentState,
                                            this , "GetCurrentState");
+
+        interfaceProvided->AddCommandWrite(&mtsSocketClientPSM::SetDesiredSpecial,
+                                           this , "SetDesiredSpecial");
+        interfaceProvided->AddCommandRead(&mtsSocketClientPSM::GetDesiredSpecial,
+                                           this , "GetDesiredSpecial");
+        interfaceProvided->AddCommandRead(&mtsSocketClientPSM::GetCurrentSpecial,
+                                           this , "GetCurrentSpecial");
+
     }
 }
 
@@ -74,7 +85,12 @@ void mtsSocketClientPSM::UpdateApplication(void)
     CurrentState = State.Data.RobotControlState;
     PositionCartesianCurrent.Valid() = (CurrentState >= socketMessages::SCK_HOMED);
     PositionCartesianCurrent.Position().FromNormalized(State.Data.CurrentPose);
+    ForceCartesianCurrent.Force().Assign(State.Data.CurrentForce.at(0),
+                                        State.Data.CurrentForce.at(1),
+                                        State.Data.CurrentForce.at(2),
+                                        0, 0,0);
     StateJaw.Position().at(0) = State.Data.CurrentJaw;
+
 }
 
 void mtsSocketClientPSM::Freeze(void)
@@ -97,6 +113,22 @@ void mtsSocketClientPSM::SetDesiredState(const std::string & state)
     Command.Data.RobotControlState = DesiredState;
     Command.Data.GoalPose.From(State.Data.CurrentPose);
     Command.Data.GoalJaw = State.Data.CurrentJaw;
+}
+
+void mtsSocketClientPSM::SetDesiredSpecial(const std::string & special)
+{
+    if (special == "HFC_ON") {
+        DesiredSpecial = socketMessages::HFC_ON;
+    } else if (special == "HFC_OFF") {
+        DesiredSpecial = socketMessages::HFC_OFF;
+    } else {
+        std::cerr << CMN_LOG_DETAILS << special << " state not supported." << std::endl;
+    }
+
+    // Command.Data.RobotControlState = DesiredState;
+    // Command.Data.GoalPose.From(State.Data.CurrentPose);
+    // Command.Data.GoalJaw = State.Data.CurrentJaw;
+    Command.Data.GoalSpecial = DesiredSpecial;
 }
 
 void mtsSocketClientPSM::SetPositionCartesian(const prmPositionCartesianSet & position)
@@ -128,6 +160,21 @@ void mtsSocketClientPSM::GetDesiredState(std::string & state) const
     }
 }
 
+void mtsSocketClientPSM::GetDesiredSpecial(std::string & special) const
+{
+    switch (DesiredState) {
+    case socketMessages::HFC_OFF:
+        special = "HFC_OFF";
+        break;
+    case socketMessages::HFC_ON:
+        special = "HFC_ON";
+        break;
+    default:
+        std::cerr << CMN_LOG_DETAILS << special << " command not supported." << std::endl;
+        break;
+    }
+}
+
 void mtsSocketClientPSM::GetCurrentState(std::string & state) const
 {
     switch (CurrentState) {
@@ -141,6 +188,21 @@ void mtsSocketClientPSM::GetCurrentState(std::string & state) const
         break;
     default:
         std::cerr << CMN_LOG_DETAILS << state << " state not supported." << std::endl;
+        break;
+    }
+}
+
+void mtsSocketClientPSM::GetCurrentSpecial(std::string & special) const
+{
+    switch (CurrentSpecial) {
+    case socketMessages::HFC_OFF:
+        special = "HFC_OFF";
+        break;
+    case socketMessages::HFC_ON:
+        special = "HFC_ON";
+        break;
+    default:
+        std::cerr << CMN_LOG_DETAILS << special << " command not supported." << std::endl;
         break;
     }
 }
