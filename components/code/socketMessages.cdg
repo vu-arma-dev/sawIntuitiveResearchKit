@@ -71,7 +71,7 @@ class {
         name Version;
         type int;
         visibility public;
-    default 10100;
+    default 10101;
     description Version number. 10000 stands for 1.00.00;
     }
 
@@ -146,7 +146,14 @@ class {
         name CurrentForce;
         type vct3;
         visibility public;
-        description Current force on the arm;
+        description Current force on the arm, estimated;
+    }
+
+    member {
+        name CurrentForceGT;
+        type vct3;
+        visibility public;
+        description Current force on the arm, ground truth;
     }
 
     member {
@@ -162,6 +169,20 @@ class {
         visibility public;
         default socketMessages::HFC_OFF;
         description Special Command for other data;
+    }
+
+    member {
+        name CurrentMagPos;
+        type vct3;
+        visibility public;
+        description Magnetic measurement of end effector tip pose;
+    }
+
+    member {
+        name CurrentMagVec;
+        type vct3;
+        visibility public;
+        description Magnetic measurement of end effector tip orientation;
     }
 }
 
@@ -197,7 +218,7 @@ class {
         type vct3;
         visibility public;
         description Desired force control on the arm;
-    }   
+    }
 
     member {
         name GoalJaw;

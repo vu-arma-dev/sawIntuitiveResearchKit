@@ -47,6 +47,7 @@ protected:
     void Freeze(void);
     void SetPositionCartesian(const prmPositionCartesianSet & position);
     void SetPositionJaw(const prmPositionJointSet & position);
+    void SetForceGain(const vct3 & forceGainInput);
     void UpdateApplication(void);
     void ReceivePSMStateData(void);
     void SendPSMCommandData(void);
@@ -54,8 +55,15 @@ protected:
 private:
     prmPositionCartesianGet PositionCartesianCurrent;
     prmForceCartesianGet ForceCartesianCurrent;
+    prmForceCartesianGet ForceCartesianCurrentGT;
+    vct3 MagCartesianCurrent;
+    vct3 MagVecCurrent;
     prmStateJoint StateJaw;
     mtsInterfaceProvided * mInterface;
+    vct3 forceEstimateGain;
+    std::deque<vct3> forceList;
+    std::deque<vct3> forceListGT;
+
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsSocketClientPSM);
