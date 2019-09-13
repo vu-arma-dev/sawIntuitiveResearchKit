@@ -2309,6 +2309,7 @@ void mtsIntuitiveResearchKitConsole::SetVolume(const double & volume)
 
 void mtsIntuitiveResearchKitConsole::ClutchEventHandler(const prmEventButton & button)
 {
+    OperatorPresentEventHandler(button);
     switch (button.Type()) {
     case prmEventButton::PRESSED:
         mInterface->SendStatus(this->GetName() + ": clutch pressed");

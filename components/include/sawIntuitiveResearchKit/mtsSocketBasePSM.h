@@ -28,9 +28,11 @@ http://www.cisst.org/cisst/license.txt.
 #include <sawIntuitiveResearchKit/mtsIntuitiveResearchKitArmTypes.h>
 #include <sawIntuitiveResearchKit/socketMessages.h>
 
-#define VERSION 10000
+#define VERSION 10101
 #define BUFFER_SIZE 1024
-#define CLIENT_MSG_SIZE 140
+//Note, the STATE size is never used, but I'm adding it for clarity
+#define CLIENT_MSG_SIZE_STATE 240
+#define CLIENT_MSG_SIZE_CMD 168
 #define SERVER_MSG_SIZE 140
 
 #define TIMEOUT 4.0 * cmn_ms
@@ -68,6 +70,7 @@ protected:
     bool mIsServer;
     const osaTimeServer & mTimeServer;
     socketMessages::StateType CurrentState, DesiredState;
+    socketMessages::SpecialCommand CurrentSpecial,DesiredSpecial;
 
 private:
     unsigned int mPacketsLost;

@@ -20,12 +20,14 @@ http://www.cisst.org/cisst/license.txt.
 #define _mtsSocketClientPSM_h
 
 #include <sawIntuitiveResearchKit/mtsSocketBasePSM.h>
+#include <cisstParameterTypes/prmForceCartesianGet.h>
+
 
 class mtsSocketClientPSM: public mtsSocketBasePSM
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION_ONEARG, CMN_LOG_ALLOW_DEFAULT);
 
-public :
+public:
     mtsSocketClientPSM(const std::string & componentName, const double periodInSeconds,
                        const std::string & ip, const unsigned int port);
     mtsSocketClientPSM(const mtsTaskPeriodicConstructorArg & arg);
@@ -38,17 +40,30 @@ protected:
     void GetDesiredState(std::string & state) const;
     void GetCurrentState(std::string & state) const;
 
+    void SetDesiredSpecial(const std::string & special);
+    void GetDesiredSpecial(std::string & special) const;
+    void GetCurrentSpecial(std::string & special) const;
+
     void Freeze(void);
     void SetPositionCartesian(const prmPositionCartesianSet & position);
     void SetPositionJaw(const prmPositionJointSet & position);
+    void SetForceGain(const vct3 & forceGainInput);
     void UpdateApplication(void);
     void ReceivePSMStateData(void);
     void SendPSMCommandData(void);
 
 private:
     prmPositionCartesianGet PositionCartesianCurrent;
+    prmForceCartesianGet ForceCartesianCurrent;
+    prmForceCartesianGet ForceCartesianCurrentGT;
+    vct3 MagCartesianCurrent;
+    vct3 MagVecCurrent;
     prmStateJoint StateJaw;
     mtsInterfaceProvided * mInterface;
+    vct3 forceEstimateGain;
+    std::deque<vct3> forceList;
+    std::deque<vct3> forceListGT;
+
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsSocketClientPSM);

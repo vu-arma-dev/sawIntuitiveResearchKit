@@ -100,7 +100,7 @@ void mtsTeleOperationPSM::Init(void)
                                        &mtsTeleOperationPSM::TransitionEnabled,
                                        this);
 
-    mScale = 0.2;
+    //mScale = 0.2;
     mIgnoreJaw = false;
     mIsClutched = false;
 
@@ -348,6 +348,7 @@ void mtsTeleOperationPSM::SetDesiredState(const std::string & state)
 void mtsTeleOperationPSM::SetScale(const double & scale)
 {
     // set scale
+    std::cerr << "SETTING SCALE TO " << scale << std::endl;
     mConfigurationStateTable->Start();
     mScale = scale;
     mConfigurationStateTable->Advance();
