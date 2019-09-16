@@ -102,6 +102,7 @@ protected:
         mtsFunctionWrite LockOrientation;
         mtsFunctionVoid  UnlockOrientation;
         mtsFunctionWrite SetWrenchBody;
+        mtsFunctionWrite SetWrenchSpatial;
         mtsFunctionWrite SetGravityCompensation;
 
         prmStateJoint StateGripper;

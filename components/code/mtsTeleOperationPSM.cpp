@@ -131,6 +131,7 @@ void mtsTeleOperationPSM::Init(void)
         interfaceRequired->AddFunction("LockOrientation", mMTM.LockOrientation);
         interfaceRequired->AddFunction("UnlockOrientation", mMTM.UnlockOrientation);
         interfaceRequired->AddFunction("SetWrenchBody", mMTM.SetWrenchBody);
+        interfaceRequired->AddFunction("SetWrenchSpatial", mMTM.SetWrenchSpatial);
         interfaceRequired->AddFunction("SetGravityCompensation", mMTM.SetGravityCompensation);
         interfaceRequired->AddFunction("GetCurrentState", mMTM.GetCurrentState);
         interfaceRequired->AddFunction("GetDesiredState", mMTM.GetDesiredState);
